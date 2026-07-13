@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 266" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<text x="16" y="20" font-size="15" font-weight="700" fill="#1f2937">NeuroGraphRAG — ndcg@10 by retrieval configuration</text>
+<text x="16" y="55" font-size="12.5" fill="#334155">BM25</text>
+<rect x="210" y="40" width="310.3" height="20" rx="4" fill="#94a3b8"/>
+<text x="528.3" y="55" font-size="12.5" fill="#1f2937">0.691</text>
+<text x="16" y="89" font-size="12.5" fill="#334155">Dense</text>
+<rect x="210" y="74" width="291.1" height="20" rx="4" fill="#94a3b8"/>
+<text x="509.1" y="89" font-size="12.5" fill="#1f2937">0.648</text>
+<text x="16" y="123" font-size="12.5" fill="#334155">Graph</text>
+<rect x="210" y="108" width="308.8" height="20" rx="4" fill="#94a3b8"/>
+<text x="526.8" y="123" font-size="12.5" fill="#1f2937">0.687</text>
+<text x="16" y="157" font-size="12.5" fill="#334155">RRF (BM25+Dense)</text>
+<rect x="210" y="142" width="317.6" height="20" rx="4" fill="#94a3b8"/>
+<text x="535.6" y="157" font-size="12.5" fill="#1f2937">0.707</text>
+<text x="16" y="191" font-size="12.5" fill="#334155">RRF (BM25+Dense+Graph)</text>
+<rect x="210" y="176" width="325.7" height="20" rx="4" fill="#94a3b8"/>
+<text x="543.7" y="191" font-size="12.5" fill="#1f2937">0.725</text>
+<text x="16" y="225" font-size="12.5" fill="#334155">C²RF (ours)</text>
+<rect x="210" y="210" width="344.0" height="20" rx="4" fill="#4f46e5"/>
+<text x="562.0" y="225" font-size="12.5" fill="#1f2937">0.766</text>
+</svg>

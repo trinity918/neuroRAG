@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>NeuroGraphRAG</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#141a2e; --panel2:#1b2340; --line:#26304f;
+    --text:#e7ecf7; --muted:#93a0c0; --accent:#6366f1; --accent2:#22d3ee;
+    --good:#34d399; --warn:#fbbf24;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  header{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .logo{font-weight:800;font-size:20px;letter-spacing:.3px}
+  .logo span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tag{color:var(--muted);font-size:12.5px}
+  .stats{margin-left:auto;display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .stats b{color:var(--text)}
+  main{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;padding:18px 24px;max-width:1400px;margin:0 auto}
+  @media(max-width:1000px){main{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .card h2{margin:0 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  .searchbar{display:flex;gap:10px;flex-wrap:wrap}
+  input[type=text]{flex:1;min-width:220px;background:var(--panel2);border:1px solid var(--line);color:var(--text);
+    padding:12px 14px;border-radius:10px;font-size:15px;outline:none}
+  input[type=text]:focus{border-color:var(--accent)}
+  button{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:600;cursor:pointer}
+  button.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--text)}
+  button:hover{filter:brightness(1.08)}
+  .controls{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;align-items:center;font-size:13px;color:var(--muted)}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+    padding:6px 10px;border-radius:999px;cursor:pointer;user-select:none}
+  .chip.on{border-color:var(--accent);color:var(--text)}
+  select{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:8px}
+  .examples{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  .examples a{color:var(--accent2);cursor:pointer;font-size:12.5px;text-decoration:none;border-bottom:1px dashed transparent}
+  .examples a:hover{border-color:var(--accent2)}
+  .answer{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    border-radius:12px;padding:14px;margin-top:14px}
+  .answer .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent2)}
+  .commsum{color:var(--muted);font-size:12.5px;margin-top:8px;border-left:2px solid var(--accent);padding-left:10px}
+  .result{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-top:10px;background:var(--panel2)}
+  .result .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .badge{font-size:10.5px;padding:2px 7px;border-radius:999px;background:#2a3358;color:#c8d2f0;text-transform:uppercase;letter-spacing:.4px}
+  .badge.lang{background:#123a34;color:#7ff0cf}
+  .badge.comm{background:#2d2450;color:#c9b8ff}
+  .score{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--good);font-weight:700}
+  .result h3{margin:6px 0 4px;font-size:14.5px}
+  .result p{margin:4px 0;color:#c3ccdf;font-size:13px}
+  .src{color:var(--muted);font-size:11.5px;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
+  .src b{color:#aab6d6}
+  canvas{width:100%;height:340px;background:radial-gradient(1200px 400px at 30% -10%,#182046,#0c1225);border-radius:12px;border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  tr.best td{color:var(--good);font-weight:700}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+  .muted{color:var(--muted)}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Neuro<span>GraphRAG</span></div>
+  <div class="tag">Community-Aware Cross-Lingual GraphRAG · EEG / ERP & biomedical literature</div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Ask across languages</h2>
+    <div class="searchbar">
+      <input id="q" type="text" placeholder="e.g. What does the N400 measure?  ·  अल्फा लय की आवृत्ति क्या है?"/>
+      <button id="go">Search</button>
+    </div>
+    <div class="controls">
+      <span>Retrievers:</span>
+      <span class="chip on" data-r="bm25">BM25</span>
+      <span class="chip on" data-r="dense">Dense</span>
+      <span class="chip on" data-r="graph">Graph</span>
+      <span style="margin-left:8px">Fusion:</span>
+      <select id="fusion">
+        <option value="c2rf">C²RF (ours)</option>
+        <option value="rrf">RRF</option>
+        <option value="single">Single</option>
+      </select>
+    </div>
+    <div class="examples" id="examples"></div>
+    <div id="answer"></div>
+    <div id="results"></div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>Knowledge graph</h2>
+      <canvas id="graph" width="640" height="340"></canvas>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h2>Evaluation (nDCG@10 · MRR · Recall@5)</h2>
+      <div id="evalbox" class="muted">loading…</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const API = location.origin;
+const el = id => document.getElementById(id);
+const retrievers = new Set(["bm25","dense","graph"]);
+
+document.querySelectorAll(".chip").forEach(c=>{
+  c.onclick=()=>{const r=c.dataset.r; if(retrievers.has(r)&&retrievers.size>1){retrievers.delete(r);c.classList.remove("on");}
+    else{retrievers.add(r);c.classList.add("on");}};
+});
+
+const EXAMPLES = [
+  "What does the N400 component measure?",
+  "अल्फा लय की आवृत्ति क्या है?",
+  "Which ERP components are altered in schizophrenia?",
+  "মৃগীরোগ নির্ণয়ে EEG কীভাবে সাহায্য করে?",
+  "signals and methods for a motor-imagery BCI",
+];
+el("examples").innerHTML = EXAMPLES.map(e=>`<a data-q="${encodeURIComponent(e)}">${e}</a>`).join("");
+el("examples").querySelectorAll("a").forEach(a=>a.onclick=()=>{el("q").value=decodeURIComponent(a.dataset.q);runSearch();});
+
+async function j(url,opts){const r=await fetch(url,opts);return r.json();}
+
+async function loadStats(){
+  const s=await j(API+"/api/stats");
+  el("stats").innerHTML=`<span><b>${s.passages}</b> passages</span>
+    <span><b>${s.concepts_in_graph}</b> concepts</span>
+    <span><b>${s.edges}</b> edges</span>
+    <span><b>${s.communities}</b> communities</span>
+    <span><b>${s.languages.join(", ")}</b></span>
+    <span><b>${s.embedding_backend}</b> ${s.embedding_dim}d</span>`;
+}
+
+function langName(l){return {en:"EN",hi:"HI",bn:"BN",ta:"TA"}[l]||l.toUpperCase();}
+
+async function runSearch(){
+  const q=el("q").value.trim(); if(!q) return;
+  el("go").innerHTML='<span class="spinner"></span>';
+  const body={query:q,retrievers:[...retrievers],fusion:el("fusion").value,top_k:8};
+  const data=await j(API+"/api/answer",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  el("go").textContent="Search";
+  el("answer").innerHTML=`<div class="answer"><div class="lbl">Synthesized answer</div>
+    <div>${data.answer}</div>
+    ${data.community_summary?`<div class="commsum">🕸 ${data.community_summary}</div>`:""}</div>`;
+  el("results").innerHTML=data.results.map((r,i)=>{
+    const via=Object.entries(r.ranks||{}).map(([k,v])=>`${k}#${v}`).join(" · ")||"—";
+    return `<div class="result"><div class="top">
+      <span class="badge lang">${langName(r.lang)}</span>
+      <span class="badge comm">community ${r.community}</span>
+      <span class="score">${r.score.toFixed(4)}</span></div>
+      <h3>${r.title}</h3><p>${r.text}</p>
+      <div class="src"><span><b>source:</b> ${r.source}</span><span><b>via:</b> ${via}</span>
+      <span><b>concepts:</b> ${r.concepts.slice(0,6).join(", ")}</span></div></div>`;
+  }).join("");
+  highlight(data.results.map(r=>r.doc_id));
+}
+el("go").onclick=runSearch;
+el("q").addEventListener("keydown",e=>{if(e.key==="Enter")runSearch();});
+
+/* ---------------- knowledge graph (hand-rolled force layout) ---------------- */
+const PALETTE=["#6366f1","#22d3ee","#34d399","#fbbf24","#f472b6","#a78bfa","#f87171","#38bdf8"];
+let G={nodes:[],edges:[]}, hot=new Set();
+async function loadGraph(){
+  G=await j(API+"/api/graph?max_nodes=90");
+  const cv=el("graph"),W=cv.width=cv.clientWidth,H=cv.height;
+  G.nodes.forEach(n=>{n.x=Math.random()*W;n.y=Math.random()*H;n.vx=0;n.vy=0;});
+  const idx=Object.fromEntries(G.nodes.map((n,i)=>[n.id,i]));
+  const comms=[...new Set(G.nodes.map(n=>n.community))].sort((a,b)=>a-b);
+  el("legend").innerHTML=comms.map(c=>{const t=(G.communities.find(x=>x.id===c)||{}).theme||("community "+c);
+    return `<span><span class="dot" style="background:${PALETTE[c%PALETTE.length]}"></span>${t}</span>`;}).join("");
+  const ctx=cv.getContext("2d");
+  function step(){
+    for(let a=0;a<G.nodes.length;a++){const na=G.nodes[a];
+      for(let b=a+1;b<G.nodes.length;b++){const nb=G.nodes[b];
+        let dx=na.x-nb.x,dy=na.y-nb.y,d2=dx*dx+dy*dy+.01,d=Math.sqrt(d2);
+        let f=1400/d2;na.vx+=f*dx/d;na.vy+=f*dy/d;nb.vx-=f*dx/d;nb.vy-=f*dy/d;}}
+    G.edges.forEach(e=>{const a=G.nodes[idx[e.source]],b=G.nodes[idx[e.target]];if(!a||!b)return;
+      let dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)+.01,f=(d-70)*0.012*(e.weight>2?1.6:1);
+      a.vx+=f*dx/d;a.vy+=f*dy/d;b.vx-=f*dx/d;b.vy-=f*dy/d;});
+    G.nodes.forEach(n=>{n.vx+=(W/2-n.x)*0.0016;n.vy+=(H/2-n.y)*0.0016;
+      n.x+=n.vx*=0.86;n.y+=n.vy*=0.86;n.x=Math.max(12,Math.min(W-12,n.x));n.y=Math.max(12,Math.min(H-12,n.y));});
+    ctx.clearRect(0,0,W,H);
+    ctx.lineWidth=1;
+    G.edges.forEach(e=>{const a=G.nodes[idx[e.source]],b=G.nodes[idx[e.target]];if(!a||!b)return;
+      ctx.strokeStyle=(hot.has(a.id)&&hot.has(b.id))?"rgba(99,102,241,.6)":"rgba(120,135,180,.13)";
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();});
+    G.nodes.forEach(n=>{const r=4+Math.min(7,n.degree);const c=PALETTE[n.community%PALETTE.length];
+      ctx.globalAlpha=hot.size&&!hot.has(n.id)?0.35:1;
+      ctx.fillStyle=c;ctx.beginPath();ctx.arc(n.x,n.y,r,0,7);ctx.fill();
+      if(n.degree>=5||hot.has(n.id)){ctx.globalAlpha=1;ctx.fillStyle="#dfe6f7";ctx.font="10px Segoe UI";ctx.fillText(n.label,n.x+r+2,n.y+3);}
+      ctx.globalAlpha=1;});
+    requestAnimationFrame(step);
+  }
+  step();
+}
+function highlight(docIds){
+  // map retrieved docs -> concepts they mention -> light up graph nodes
+  hot=new Set();
+  const wanted=new Set(docIds);
+  // we don't have per-node doc mapping client-side; approximate by matching labels in results text
+  const text=[...document.querySelectorAll(".result p, .result h3")].map(e=>e.textContent.toLowerCase()).join(" ");
+  G.nodes.forEach(n=>{if(text.includes(n.label.toLowerCase()))hot.add(n.id);});
+}
+
+/* ---------------- eval panel ---------------- */
+async function loadEval(){
+  const run=await j(API+"/api/eval");
+  if(run.error){el("evalbox").textContent=run.error;return;}
+  const rows=run.results;
+  const best=rows.reduce((a,b)=>(b.metrics["ndcg@10"]>a.metrics["ndcg@10"]?b:a));
+  el("evalbox").innerHTML=`<table><thead><tr><th>Config</th><th>nDCG@10</th><th>MRR</th><th>Recall@5</th><th>Faith.</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr class="${r===best?"best":""}">
+      <td>${r.name}</td><td>${r.metrics["ndcg@10"].toFixed(3)}</td><td>${r.metrics["mrr"].toFixed(3)}</td>
+      <td>${r.metrics["recall@5"].toFixed(3)}</td><td>${(r.ragas.faithfulness||0).toFixed(3)}</td></tr>`).join("")}</tbody></table>
+    <div class="muted" style="margin-top:8px">${run.meta.num_queries} queries · langs ${run.meta.languages.join(", ")} · backend ${run.meta.embedding_backend}</div>`;
+}
+
+loadStats(); loadGraph(); loadEval();
+</script>
+</body>
+</html>

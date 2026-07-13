@@ -1,0 +1,26 @@
+# Accelerated / research extras. Everything here is OPTIONAL: the pipeline
+# detects each library at runtime and falls back to a pure-numpy path when a
+# package is missing. Install these to reproduce the paper's "full-stack"
+# configuration (true multilingual dense retrieval + LoRA domain adaptation).
+
+# --- True multilingual dense retrieval ---
+sentence-transformers>=2.7      # LaBSE / paraphrase-multilingual encoders
+transformers>=4.40
+torch>=2.1
+
+# --- LoRA / PEFT domain adaptation ---
+peft>=0.10
+accelerate>=0.29
+datasets>=2.19
+
+# --- ANN index (falls back to numpy brute-force cosine) ---
+faiss-cpu>=1.8
+
+# --- Lexical retrieval (falls back to a pure-python BM25) ---
+rank-bm25>=0.2.2
+
+# --- Faithful RAGAS metrics (falls back to embedding-based proxies) ---
+ragas>=0.1.7
+
+# --- AI4Bharat IndicNLP utilities for Indic normalization / tokenization ---
+indic-nlp-library>=0.92

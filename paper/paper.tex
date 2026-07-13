@@ -1,0 +1,127 @@
+\documentclass[10pt,twocolumn]{article}
+% Compile-ready with a stock TeX install:  pdflatex paper.tex
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage[margin=0.8in]{geometry}
+\usepackage{hyperref}
+
+\title{\textbf{NeuroGraphRAG: Community-Aware Cross-Lingual GraphRAG\\ for Multilingual Neuroscience Retrieval}}
+\author{NeuroGraphRAG contributors}
+\date{2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Retrieval-augmented generation over scientific literature is dominated by monolingual, flat dense
+retrieval, which underperforms on jargon-dense, multilingual, and \emph{global} information needs. We
+present \textbf{NeuroGraphRAG}, a graph-augmented retrieval system for neuroscience (EEG/ERP and
+biomedical literature) that (i) grounds a knowledge graph, a graph retriever, and a text embedder in a
+single curated ontology with \emph{multilingual aliases}, yielding cross-lingual concept embeddings
+without any trained model; and (ii) introduces \textbf{Community-Aware Cross-Lingual Retrieval Fusion
+(C\textsuperscript{2}RF)}, which augments reciprocal-rank fusion of lexical, dense, and graph signals
+with a knowledge-graph community prior. On a bundled multilingual benchmark (44 passages, 24 queries,
+four languages), C\textsuperscript{2}RF attains the best nDCG@10 (0.766), MAP (0.648), and Recall@5
+(0.712), improving nDCG@10 over the strongest fusion baseline by 4.1 points and over BM25 by 7.5 points,
+with the largest gains on cross-lingual (+18.5 over BM25) and global (+6.5) queries. The full pipeline
+runs offline on CPU; optional \texttt{sentence-transformers}+LoRA/PEFT and FAISS backends are supported.
+\end{abstract}
+
+\section{Introduction}
+Neuroscience is a demanding setting for scientific retrieval: terminology is dense and
+abbreviation-heavy (N400, MMN, SSVEP, ICA), many readers are more comfortable in Indic languages than in
+English, and many real questions are \emph{global} (``which ERP components are altered in
+schizophrenia?'') rather than a single-passage lookup. GraphRAG~\cite{edge2024graphrag} added
+knowledge-graph structure and community summaries for global questions, but existing pipelines are
+English-centric and lean heavily on large LLMs. We ask whether lightweight, ontology-grounded structure
+can deliver GraphRAG-style cross-lingual and global benefits without a large model in the loop.
+
+Our contributions: (1) \emph{ontology-grounded concept embeddings} that are cross-lingual by
+construction; (2) a precise seed-centric \emph{graph-expansion retriever} fused with BM25 and dense
+signals; (3) \emph{C\textsuperscript{2}RF}, a multiplicative community prior over rank fusion; and (4) a
+reproducible, offline evaluation harness with a full ablation grid.
+
+\section{Method}
+\textbf{Ontology and matching.} Typed concepts carry a canonical form, per-language aliases, and seed
+relations. A single matcher tags text with concept ids and is reused by the graph, the graph retriever,
+and the embedder, keeping them consistent.
+
+\textbf{Cross-lingual concept embeddings.} A passage maps to
+$v=[\,w\cdot\mathrm{onehot}(\mathrm{concepts})\,;\,\mathrm{hash}(\text{char n-grams})\,]$, L2-normalized.
+The concept block is language-independent, so parallel English/Hindi passages share dimensions and align.
+
+\textbf{Knowledge graph.} Concept nodes are linked by ontology seed relations and corpus co-occurrence;
+weighted greedy-modularity communities each receive a templated summary for global context.
+
+\textbf{Retrievers.} BM25 (Indic-aware tokenization); dense cosine search (FAISS or numpy); and a graph
+retriever scoring passages by hop-decayed concept coverage (seed 2.0, 1-hop 0.3, 2-hop 0.1).
+
+\textbf{C\textsuperscript{2}RF.} On top of reciprocal-rank fusion
+$s(p)=\sum_r w_r/(k+\mathrm{rank}_r(p))$, we apply $s(p)\leftarrow s(p)\,(1+\lambda\,a(p))$, where the
+affinity $a(p)$ is the community-weight mass of the query-relevant concepts that $p$ actually contains
+(capped at 1). Gating on concept overlap guarantees an on-topic passage is never demoted below a merely
+same-community distractor.
+
+\section{Experiments}
+The benchmark has 44 concept-dense passages (English with parallel Hindi, plus Bengali/Tamil) and 24
+typed queries (factoid, cross-lingual, global, multi-hop) with binary relevance and reference answers.
+Primary metric is nDCG@10; backend \texttt{concept-hash}; seed 20260713.
+
+\begin{table}[t]
+\centering\small
+\caption{Main results on the bundled benchmark.}
+\begin{tabular}{lcccc}
+\toprule
+Configuration & MRR & MAP & R@5 & nDCG@10 \\
+\midrule
+BM25 & 0.958 & 0.573 & 0.622 & 0.691 \\
+Dense & 0.951 & 0.541 & 0.580 & 0.648 \\
+Graph & 0.638 & 0.596 & 0.705 & 0.687 \\
+RRF (BM25+Dense) & \textbf{1.000} & 0.589 & 0.608 & 0.707 \\
+RRF (+Graph) & 0.979 & 0.607 & 0.622 & 0.725 \\
+\textbf{C\textsuperscript{2}RF (ours)} & 0.979 & \textbf{0.648} & \textbf{0.712} & \textbf{0.766} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\caption{nDCG@10 by query type.}
+\begin{tabular}{lcccc}
+\toprule
+Configuration & fact. & cross-ling. & global & multi-hop \\
+\midrule
+BM25 & 0.761 & 0.582 & 0.632 & 0.832 \\
+Dense & 0.655 & 0.670 & 0.561 & 0.754 \\
+RRF (B+D) & 0.736 & 0.657 & 0.682 & 0.805 \\
+\textbf{C\textsuperscript{2}RF} & 0.782 & \textbf{0.767} & \textbf{0.697} & 0.832 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Findings.} Fusion beats any single retriever; adding the graph signal lifts nDCG@10
+$0.707\!\to\!0.725$; and C\textsuperscript{2}RF lifts it $0.725\!\to\!0.766$, concentrated on
+cross-lingual and global queries. On cross-lingual queries, concept-grounded configurations far exceed
+BM25 (0.767/0.670 vs.\ 0.582), isolating the value of shared-concept embeddings.
+
+\section{Limitations and Conclusion}
+The benchmark is small and partly synthetic, so the contribution is the relative ordering of
+configurations and its mechanism. NeuroGraphRAG shows ontology-grounded structure delivers
+GraphRAG-style cross-lingual and global benefits cheaply and reproducibly, with C\textsuperscript{2}RF a
+small, interpretable addition to rank fusion.
+
+\begin{thebibliography}{9}
+\bibitem{edge2024graphrag} D.\ Edge et al.\ From Local to Global: A Graph RAG Approach to Query-Focused Summarization. 2024.
+\bibitem{rrf} G.\ Cormack, C.\ Clarke, S.\ Buettcher. Reciprocal Rank Fusion. SIGIR 2009.
+\bibitem{dpr} V.\ Karpukhin et al.\ Dense Passage Retrieval. EMNLP 2020.
+\bibitem{labse} F.\ Feng et al.\ Language-agnostic BERT Sentence Embedding. 2020.
+\bibitem{lora} E.\ Hu et al.\ LoRA: Low-Rank Adaptation of Large Language Models. ICLR 2022.
+\bibitem{ragas} S.\ Es et al.\ RAGAS. 2023.
+\end{thebibliography}
+
+\end{document}

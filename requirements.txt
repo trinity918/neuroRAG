@@ -1,0 +1,11 @@
+# Core runtime — the full pipeline (ingest -> KG -> hybrid retrieval -> eval)
+# runs end-to-end on just these packages, no GPU or model downloads required.
+numpy>=1.24
+scipy>=1.10
+networkx>=3.0
+pyyaml>=6.0
+pydantic>=2.0
+
+# API server (optional at runtime, but small and pure-python-friendly)
+fastapi>=0.110
+uvicorn[standard]>=0.29

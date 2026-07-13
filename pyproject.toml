@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neurographrag"
+version = "0.1.0"
+description = "Community-Aware Cross-Lingual GraphRAG for multilingual neuroscience retrieval over EEG/ERP and biomedical literature."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "NeuroGraphRAG contributors" }]
+keywords = ["graphrag", "rag", "retrieval", "neuroscience", "eeg", "erp", "multilingual", "knowledge-graph", "lora"]
+
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "networkx>=3.0",
+  "pyyaml>=6.0",
+  "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+api = ["fastapi>=0.110", "uvicorn[standard]>=0.29"]
+st = ["sentence-transformers>=2.7", "transformers>=4.40", "torch>=2.1"]
+lora = ["peft>=0.10", "accelerate>=0.29", "datasets>=2.19"]
+faiss = ["faiss-cpu>=1.8"]
+dev = ["pytest>=8.0", "ruff>=0.4", "mypy>=1.9"]
+
+[project.scripts]
+neurographrag = "neurographrag.cli:main"
+ngr = "neurographrag.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+neurographrag = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

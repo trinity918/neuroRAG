@@ -1,0 +1,390 @@
+# NeuroGraphRAG domain ontology.
+# A compact, curated neuroscience/EEG ontology with MULTILINGUAL aliases.
+# Because every language's alias maps to the same `id`, this table is the
+# cross-lingual bridge that lets the zero-dependency `concept-hash` embedder
+# align an English passage with its Hindi counterpart (they share concept ids).
+#
+# `type` groups concepts; `relations` seed typed edges into the knowledge graph
+# (co-occurrence edges are added on top of these during graph construction).
+
+meta:
+  name: neuro-eeg-ontology
+  version: "0.1.0"
+  languages: [en, hi, bn, ta]
+
+concepts:
+  # ---- Modalities / acquisition ----
+  - id: eeg
+    canonical: EEG
+    type: Modality
+    aliases:
+      en: ["EEG", "electroencephalography", "electroencephalogram"]
+      hi: ["ईईजी", "इलेक्ट्रोएन्सेफ़ैलोग्राफ़ी", "मस्तिष्क तरंग"]
+      bn: ["ইইজি"]
+      ta: ["மின்மூளையியல்"]
+    definition: "Non-invasive recording of scalp electrical activity."
+  - id: meg
+    canonical: MEG
+    type: Modality
+    aliases:
+      en: ["MEG", "magnetoencephalography"]
+      hi: ["एमईजी", "मैग्नेटोएन्सेफ़ैलोग्राफ़ी"]
+    definition: "Recording of magnetic fields produced by neural currents."
+  - id: fmri
+    canonical: fMRI
+    type: Modality
+    aliases:
+      en: ["fMRI", "functional MRI", "functional magnetic resonance imaging", "BOLD"]
+      hi: ["एफएमआरआई", "कार्यात्मक एमआरआई"]
+    definition: "Haemodynamic imaging of brain activity via the BOLD signal."
+
+  # ---- Rhythms / oscillations ----
+  - id: delta
+    canonical: Delta rhythm
+    type: BrainRhythm
+    aliases:
+      en: ["delta", "delta wave", "delta band", "delta oscillation"]
+      hi: ["डेल्टा", "डेल्टा तरंग", "डेल्टा लय"]
+    definition: "0.5-4 Hz oscillation, dominant in deep sleep."
+  - id: theta
+    canonical: Theta rhythm
+    type: BrainRhythm
+    aliases:
+      en: ["theta", "theta wave", "theta band", "theta oscillation"]
+      hi: ["थीटा", "थीटा तरंग", "थीटा लय"]
+    definition: "4-8 Hz oscillation linked to memory and drowsiness."
+  - id: alpha
+    canonical: Alpha rhythm
+    type: BrainRhythm
+    aliases:
+      en: ["alpha", "alpha wave", "alpha band", "alpha rhythm", "posterior alpha"]
+      hi: ["अल्फा", "अल्फा तरंग", "अल्फा लय"]
+      ta: ["ஆல்ஃபா அலை"]
+    definition: "8-12 Hz oscillation prominent over occipital cortex at rest."
+  - id: mu
+    canonical: Mu rhythm
+    type: BrainRhythm
+    aliases:
+      en: ["mu rhythm", "mu wave", "sensorimotor rhythm", "SMR"]
+      hi: ["म्यू लय", "म्यू तरंग"]
+    definition: "8-13 Hz sensorimotor rhythm suppressed by movement."
+  - id: beta
+    canonical: Beta rhythm
+    type: BrainRhythm
+    aliases:
+      en: ["beta", "beta wave", "beta band", "beta oscillation"]
+      hi: ["बीटा", "बीटा तरंग", "बीटा लय"]
+    definition: "13-30 Hz oscillation associated with active, alert cognition."
+  - id: gamma
+    canonical: Gamma rhythm
+    type: BrainRhythm
+    aliases:
+      en: ["gamma", "gamma band", "gamma oscillation", "high gamma"]
+      hi: ["गामा", "गामा तरंग", "गामा लय"]
+    definition: "30-100 Hz oscillation linked to feature binding and attention."
+
+  # ---- ERP components ----
+  - id: n400
+    canonical: N400
+    type: ERPComponent
+    aliases:
+      en: ["N400", "N400 component", "N400 effect", "N4"]
+      hi: ["एन400", "एन400 तरंग", "एन400 घटक"]
+      bn: ["এন৪০০"]
+    definition: "Negative ERP peaking ~400 ms indexing semantic processing."
+  - id: p300
+    canonical: P300
+    type: ERPComponent
+    aliases:
+      en: ["P300", "P3", "P3b", "P300 component"]
+      hi: ["पी300", "पी300 तरंग"]
+    definition: "Positive ERP ~300 ms elicited by rare, task-relevant stimuli."
+  - id: n170
+    canonical: N170
+    type: ERPComponent
+    aliases:
+      en: ["N170", "N170 component", "face N170"]
+      hi: ["एन170"]
+    definition: "Face-sensitive negativity ~170 ms over occipito-temporal sites."
+  - id: mmn
+    canonical: Mismatch negativity
+    type: ERPComponent
+    aliases:
+      en: ["MMN", "mismatch negativity"]
+      hi: ["एमएमएन", "मिसमैच नेगेटिविटी", "बेमेल ऋणात्मकता"]
+    definition: "Pre-attentive deviance-detection ERP in the auditory oddball."
+  - id: p600
+    canonical: P600
+    type: ERPComponent
+    aliases:
+      en: ["P600", "P600 component", "syntactic positive shift"]
+      hi: ["पी600"]
+    definition: "Late positivity ~600 ms linked to syntactic reanalysis."
+  - id: ern
+    canonical: Error-related negativity
+    type: ERPComponent
+    aliases:
+      en: ["ERN", "error-related negativity", "Ne"]
+      hi: ["ईआरएन", "त्रुटि-संबंधी ऋणात्मकता"]
+    definition: "Fronto-central negativity following erroneous responses."
+
+  # ---- Paradigms / tasks ----
+  - id: oddball
+    canonical: Oddball paradigm
+    type: Task
+    aliases:
+      en: ["oddball", "oddball paradigm", "oddball task"]
+      hi: ["ऑडबॉल", "ऑडबॉल प्रतिमान"]
+    definition: "Task with rare deviant stimuli among frequent standards."
+  - id: motor_imagery
+    canonical: Motor imagery
+    type: Task
+    aliases:
+      en: ["motor imagery", "MI", "imagined movement"]
+      hi: ["मोटर कल्पना", "मोटर इमेजरी"]
+    definition: "Imagining movement without execution; drives BCI control."
+  - id: ssvep
+    canonical: SSVEP
+    type: Task
+    aliases:
+      en: ["SSVEP", "steady-state visual evoked potential"]
+      hi: ["एसएसवीईपी"]
+    definition: "Oscillatory response entrained to a flickering visual stimulus."
+
+  # ---- Analysis methods ----
+  - id: ica
+    canonical: Independent component analysis
+    type: Method
+    aliases:
+      en: ["ICA", "independent component analysis"]
+      hi: ["आईसीए", "स्वतंत्र घटक विश्लेषण"]
+    definition: "Blind source separation used to remove EEG artifacts."
+  - id: erp_averaging
+    canonical: ERP averaging
+    type: Method
+    aliases:
+      en: ["ERP", "event-related potential", "ERP averaging", "trial averaging", "evoked potential"]
+      hi: ["ईआरपी", "घटना-संबंधी विभव", "ईआरपी औसतन"]
+    definition: "Averaging time-locked epochs to reveal evoked components."
+  - id: time_frequency
+    canonical: Time-frequency analysis
+    type: Method
+    aliases:
+      en: ["time-frequency", "time-frequency analysis", "wavelet", "spectrogram", "Morlet"]
+      hi: ["समय-आवृत्ति विश्लेषण", "वेवलेट"]
+    definition: "Decomposition of signal power across time and frequency."
+  - id: psd
+    canonical: Power spectral density
+    type: Method
+    aliases:
+      en: ["PSD", "power spectral density", "spectral power", "Welch"]
+      hi: ["शक्ति स्पेक्ट्रल घनत्व", "स्पेक्ट्रल शक्ति"]
+    definition: "Distribution of signal power over frequency."
+  - id: source_localization
+    canonical: Source localization
+    type: Method
+    aliases:
+      en: ["source localization", "source reconstruction", "sLORETA", "beamformer", "inverse problem"]
+      hi: ["स्रोत स्थानीयकरण", "स्रोत पुनर्निर्माण"]
+    definition: "Estimating cortical generators of scalp signals."
+  - id: connectivity
+    canonical: Functional connectivity
+    type: Method
+    aliases:
+      en: ["functional connectivity", "coherence", "phase locking", "PLV", "connectivity"]
+      hi: ["कार्यात्मक संयोजकता", "कोहेरेंस", "संयोजकता"]
+    definition: "Statistical coupling between signals from brain regions."
+  - id: csp
+    canonical: Common spatial patterns
+    type: Method
+    aliases:
+      en: ["CSP", "common spatial patterns"]
+      hi: ["सीएसपी", "सामान्य स्थानिक पैटर्न"]
+    definition: "Spatial filters maximizing variance ratio between classes."
+  - id: artifact_rejection
+    canonical: Artifact rejection
+    type: Method
+    aliases:
+      en: ["artifact rejection", "artifact removal", "denoising", "eye blink removal", "artifact correction"]
+      hi: ["आर्टिफ़ैक्ट हटाना", "कलाकृति निष्कासन"]
+    definition: "Detecting and removing non-neural contamination."
+  - id: filtering
+    canonical: Filtering
+    type: Method
+    aliases:
+      en: ["filtering", "band-pass filter", "high-pass", "low-pass", "notch filter"]
+      hi: ["फ़िल्टरिंग", "बैंड-पास फ़िल्टर"]
+    definition: "Attenuating frequency bands to isolate signals of interest."
+  - id: ml_decoding
+    canonical: Machine-learning decoding
+    type: Method
+    aliases:
+      en: ["decoding", "classification", "machine learning", "deep learning", "classifier", "SVM", "CNN"]
+      hi: ["डिकोडिंग", "वर्गीकरण", "मशीन लर्निंग", "गहन शिक्षण"]
+    definition: "Predicting cognitive/behavioural state from neural features."
+
+  # ---- Applications ----
+  - id: bci
+    canonical: Brain-computer interface
+    type: Application
+    aliases:
+      en: ["BCI", "brain-computer interface", "brain-machine interface", "BMI"]
+      hi: ["बीसीआई", "मस्तिष्क-कंप्यूटर इंटरफ़ेस"]
+      ta: ["மூளை-கணினி இடைமுகம்"]
+    definition: "System translating neural activity into device commands."
+  - id: neurofeedback
+    canonical: Neurofeedback
+    type: Application
+    aliases:
+      en: ["neurofeedback", "EEG biofeedback"]
+      hi: ["न्यूरोफ़ीडबैक"]
+    definition: "Self-regulation training using real-time neural signals."
+  - id: sleep_staging
+    canonical: Sleep staging
+    type: Application
+    aliases:
+      en: ["sleep staging", "sleep stages", "polysomnography", "sleep spindle", "K-complex", "REM"]
+      hi: ["नींद अवस्था", "नींद के चरण", "पॉलीसोम्नोग्राफ़ी"]
+    definition: "Classifying sleep into stages from EEG/EOG/EMG."
+
+  # ---- Cognition ----
+  - id: semantic_memory
+    canonical: Semantic memory
+    type: Cognition
+    aliases:
+      en: ["semantic memory", "semantic processing", "lexical semantics", "meaning"]
+      hi: ["अर्थपूर्ण स्मृति", "शब्दार्थ प्रसंस्करण"]
+    definition: "Memory for concepts and word meaning."
+  - id: working_memory
+    canonical: Working memory
+    type: Cognition
+    aliases:
+      en: ["working memory", "short-term memory", "n-back"]
+      hi: ["कार्यशील स्मृति", "अल्पकालिक स्मृति"]
+    definition: "Transient maintenance and manipulation of information."
+  - id: attention
+    canonical: Attention
+    type: Cognition
+    aliases:
+      en: ["attention", "selective attention", "attentional"]
+      hi: ["ध्यान", "अवधान"]
+    definition: "Selective prioritization of information for processing."
+  - id: language
+    canonical: Language processing
+    type: Cognition
+    aliases:
+      en: ["language", "language processing", "sentence comprehension", "syntax"]
+      hi: ["भाषा", "भाषा प्रसंस्करण", "वाक्य बोध"]
+    definition: "Comprehension and production of language."
+
+  # ---- Regions ----
+  - id: occipital
+    canonical: Occipital cortex
+    type: Region
+    aliases:
+      en: ["occipital", "occipital cortex", "visual cortex", "V1"]
+      hi: ["पश्चकपाल", "दृश्य प्रांतस्था"]
+    definition: "Posterior cortex housing early visual areas."
+  - id: frontal
+    canonical: Frontal cortex
+    type: Region
+    aliases:
+      en: ["frontal", "frontal cortex", "prefrontal", "PFC", "fronto-central"]
+      hi: ["ललाट", "अग्रललाट प्रांतस्था"]
+    definition: "Anterior cortex for control, planning, and error monitoring."
+  - id: temporal
+    canonical: Temporal cortex
+    type: Region
+    aliases:
+      en: ["temporal", "temporal cortex", "auditory cortex", "superior temporal"]
+      hi: ["शंख", "श्रवण प्रांतस्था"]
+    definition: "Lateral cortex for auditory and language processing."
+  - id: hippocampus
+    canonical: Hippocampus
+    type: Region
+    aliases:
+      en: ["hippocampus", "hippocampal", "medial temporal lobe", "MTL"]
+      hi: ["हिप्पोकैम्पस", "समुद्री घोड़ा"]
+    definition: "Medial temporal structure central to memory formation."
+
+  # ---- Disorders ----
+  - id: epilepsy
+    canonical: Epilepsy
+    type: Disorder
+    aliases:
+      en: ["epilepsy", "seizure", "epileptic", "ictal", "interictal spike"]
+      hi: ["मिर्गी", "दौरा", "अपस्मार"]
+      ta: ["வலிப்பு நோய்"]
+    definition: "Disorder of recurrent seizures with abnormal synchronization."
+  - id: alzheimer
+    canonical: Alzheimer's disease
+    type: Disorder
+    aliases:
+      en: ["Alzheimer", "Alzheimer's disease", "AD", "dementia", "mild cognitive impairment", "MCI"]
+      hi: ["अल्ज़ाइमर", "अल्ज़ाइमर रोग", "मनोभ्रंश"]
+    definition: "Neurodegenerative dementia with EEG slowing."
+  - id: depression
+    canonical: Depression
+    type: Disorder
+    aliases:
+      en: ["depression", "major depressive disorder", "MDD", "frontal alpha asymmetry"]
+      hi: ["अवसाद", "डिप्रेशन"]
+    definition: "Mood disorder with characteristic frontal alpha asymmetry."
+  - id: adhd
+    canonical: ADHD
+    type: Disorder
+    aliases:
+      en: ["ADHD", "attention deficit hyperactivity disorder", "theta-beta ratio"]
+      hi: ["एडीएचडी", "ध्यान अभाव अतिसक्रियता विकार"]
+    definition: "Neurodevelopmental disorder with elevated theta/beta ratio."
+  - id: schizophrenia
+    canonical: Schizophrenia
+    type: Disorder
+    aliases:
+      en: ["schizophrenia", "psychosis", "reduced P300"]
+      hi: ["सिज़ोफ्रेनिया", "मनोविदलता"]
+    definition: "Psychotic disorder with reduced P300 and MMN amplitude."
+
+# Typed seed relations (subject -> object). These are asserted a priori and
+# merged with corpus co-occurrence edges during knowledge-graph construction.
+relations:
+  - {source: n400, target: semantic_memory, type: indexes}
+  - {source: n400, target: language, type: indexes}
+  - {source: n400, target: erp_averaging, type: measured_by}
+  - {source: p300, target: oddball, type: elicited_by}
+  - {source: p300, target: attention, type: indexes}
+  - {source: p300, target: schizophrenia, type: biomarker_in}
+  - {source: n170, target: occipital, type: localized_to}
+  - {source: mmn, target: oddball, type: elicited_by}
+  - {source: mmn, target: temporal, type: localized_to}
+  - {source: mmn, target: schizophrenia, type: biomarker_in}
+  - {source: p600, target: language, type: indexes}
+  - {source: ern, target: frontal, type: localized_to}
+  - {source: alpha, target: occipital, type: localized_to}
+  - {source: alpha, target: attention, type: modulated_by}
+  - {source: mu, target: motor_imagery, type: modulated_by}
+  - {source: mu, target: bci, type: used_in}
+  - {source: theta, target: working_memory, type: supports}
+  - {source: theta, target: hippocampus, type: generated_by}
+  - {source: gamma, target: attention, type: supports}
+  - {source: delta, target: sleep_staging, type: marker_of}
+  - {source: ica, target: artifact_rejection, type: enables}
+  - {source: ica, target: eeg, type: applied_to}
+  - {source: erp_averaging, target: eeg, type: applied_to}
+  - {source: time_frequency, target: eeg, type: applied_to}
+  - {source: psd, target: eeg, type: applied_to}
+  - {source: source_localization, target: eeg, type: applied_to}
+  - {source: connectivity, target: eeg, type: applied_to}
+  - {source: csp, target: motor_imagery, type: features_for}
+  - {source: csp, target: bci, type: used_in}
+  - {source: ml_decoding, target: bci, type: used_in}
+  - {source: motor_imagery, target: bci, type: paradigm_for}
+  - {source: ssvep, target: bci, type: paradigm_for}
+  - {source: p300, target: bci, type: paradigm_for}
+  - {source: sleep_staging, target: delta, type: uses}
+  - {source: epilepsy, target: eeg, type: diagnosed_with}
+  - {source: alzheimer, target: eeg, type: assessed_with}
+  - {source: alzheimer, target: connectivity, type: altered_in}
+  - {source: depression, target: alpha, type: altered_in}
+  - {source: adhd, target: theta, type: altered_in}
+  - {source: schizophrenia, target: gamma, type: altered_in}

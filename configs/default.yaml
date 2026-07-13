@@ -1,0 +1,86 @@
+# NeuroGraphRAG default configuration.
+# Every path is relative to the repository root. This config reproduces the
+# results reported in the paper on the bundled multilingual neuroscience
+# benchmark, using the zero-dependency `concept-hash` embedding backend.
+
+seed: 20260713
+
+paths:
+  corpus: data/corpus/neuro_corpus.jsonl
+  ontology: data/ontology/neuro_ontology.yaml
+  eval_queries: data/eval/queries.jsonl
+  artifacts: artifacts
+  runs: runs
+
+ingestion:
+  chunk_size: 90          # tokens per passage (short abstracts stay whole)
+  chunk_overlap: 20
+  min_chunk_tokens: 12
+  lowercase: true
+
+embedding:
+  backend: concept-hash   # concept-hash | sentence-transformers
+  hash_dim: 2048          # char n-gram hashed dimension
+  char_ngram_min: 3
+  char_ngram_max: 5
+  concept_weight: 2.0     # up-weight ontology-concept dimensions (cross-lingual bridge)
+  st_model: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  lora_adapter: null      # path to a trained PEFT adapter (optional)
+
+kg:
+  min_concept_freq: 1
+  cooccur_window: 1       # passages that share a concept form an edge (window=passage)
+  edge_min_weight: 1
+  community:
+    algorithm: greedy_modularity   # greedy_modularity | label_propagation
+    resolution: 1.0
+    max_summary_passages: 4
+
+retrieval:
+  top_k: 10
+  candidates_per_retriever: 50
+  fusion:
+    method: c2rf                   # c2rf | rrf | weighted
+    rrf_k: 60
+    weights:                       # relative influence of each signal in fusion
+      bm25: 1.0
+      dense: 1.0
+      graph: 0.6                    # graph refines rather than dominates top ranks
+    community_prior: 0.5           # C²RF: multiplicative boost for query-relevant communities
+  graph:
+    hops: 2
+    max_expansion_nodes: 40
+  bm25:
+    k1: 1.5
+    b: 0.75
+
+generation:
+  provider: none          # none (extractive) | anthropic | openai
+  max_context_passages: 6
+  include_community_summary: true
+
+evaluation:
+  k_values: [1, 3, 5, 10]
+  primary_metric: ndcg@10
+  configs:                # ablation grid — each row becomes a results-table entry
+    - name: BM25
+      fusion: single
+      retrievers: [bm25]
+    - name: Dense
+      fusion: single
+      retrievers: [dense]
+    - name: Graph
+      fusion: single
+      retrievers: [graph]
+    - name: RRF (BM25+Dense)
+      fusion: rrf
+      retrievers: [bm25, dense]
+    - name: RRF (BM25+Dense+Graph)
+      fusion: rrf
+      retrievers: [bm25, dense, graph]
+    - name: "C²RF (ours)"
+      fusion: c2rf
+      retrievers: [bm25, dense, graph]
+  ragas:
+    enabled: true
+    metrics: [faithfulness, answer_relevancy, context_precision]
