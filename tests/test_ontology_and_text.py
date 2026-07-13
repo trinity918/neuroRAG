@@ -1,8 +1,6 @@
 """Ontology matching, tokenization, and the cross-lingual concept bridge."""
 from pathlib import Path
 
-import numpy as np
-
 from neurographrag.embeddings import ConceptHashEmbedder
 from neurographrag.ontology import Ontology
 from neurographrag.utils import char_ngrams, tokenize
