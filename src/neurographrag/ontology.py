@@ -46,7 +46,7 @@ class Ontology:
     _phrases: list[tuple[str, str]] = field(default_factory=list)  # (normalized phrase, concept id)
 
     @classmethod
-    def load(cls, path: str | Path) -> "Ontology":
+    def load(cls, path: str | Path) -> Ontology:
         with Path(path).open("r", encoding="utf-8") as fh:
             raw = yaml.safe_load(fh)
         concepts: dict[str, Concept] = {}

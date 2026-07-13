@@ -10,7 +10,7 @@ for answer synthesis.
 from __future__ import annotations
 
 from collections import Counter, defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import networkx as nx
 
@@ -60,7 +60,7 @@ class KnowledgeGraph:
     def to_dict(self, max_nodes: int = 200) -> dict:
         """JSON-serializable view for the /graph API endpoint and figures."""
         nodes = []
-        for n, data in self.graph.nodes(data=True):
+        for n, _data in self.graph.nodes(data=True):
             c = self.ontology.concepts.get(n)
             nodes.append({
                 "id": n,

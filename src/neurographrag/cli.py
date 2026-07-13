@@ -96,10 +96,10 @@ def cmd_demo(args) -> None:
 
 
 def cmd_serve(args) -> None:
-    import uvicorn
-
     # config path is passed to the app via env so the factory can load it
     import os
+
+    import uvicorn
 
     os.environ["NGR_CONFIG"] = args.config
     uvicorn.run("neurographrag.api:app", host=args.host, port=args.port, reload=False)
@@ -113,7 +113,8 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--config", default=DEFAULT_CONFIG, help="path to YAML config")
 
     sp = sub.add_parser("index", help="build the KG + indexes and dump artifacts")
-    add_config(sp); sp.set_defaults(func=cmd_index)
+    add_config(sp)
+    sp.set_defaults(func=cmd_index)
 
     sp = sub.add_parser("query", help="run a single query end-to-end")
     add_config(sp)
@@ -124,13 +125,16 @@ def build_parser() -> argparse.ArgumentParser:
     sp.set_defaults(func=cmd_query)
 
     sp = sub.add_parser("eval", help="run the reproducible evaluation grid")
-    add_config(sp); sp.set_defaults(func=cmd_eval)
+    add_config(sp)
+    sp.set_defaults(func=cmd_eval)
 
     sp = sub.add_parser("report", help="render tables + figure from the last run")
-    add_config(sp); sp.set_defaults(func=cmd_report)
+    add_config(sp)
+    sp.set_defaults(func=cmd_report)
 
     sp = sub.add_parser("demo", help="index + eval + report in one shot")
-    add_config(sp); sp.set_defaults(func=cmd_demo)
+    add_config(sp)
+    sp.set_defaults(func=cmd_demo)
 
     sp = sub.add_parser("serve", help="launch the FastAPI backend + static UI")
     add_config(sp)

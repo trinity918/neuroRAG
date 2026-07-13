@@ -46,7 +46,7 @@ class NeuroGraphRAG:
         self.synth = synthesizer
 
     @classmethod
-    def build(cls, cfg: Config) -> "NeuroGraphRAG":
+    def build(cls, cfg: Config) -> NeuroGraphRAG:
         set_seed(cfg.seed)
         ontology = Ontology.load(cfg.resolve(cfg.paths.ontology))
         passages = load_passages(cfg, ontology)

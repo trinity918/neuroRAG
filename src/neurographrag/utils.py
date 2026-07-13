@@ -5,8 +5,9 @@ import hashlib
 import json
 import random
 import re
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any
 
 import numpy as np
 

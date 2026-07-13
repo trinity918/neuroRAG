@@ -109,7 +109,7 @@ class Config(BaseModel):
     root: str = "."
 
     @classmethod
-    def load(cls, path: str | Path) -> "Config":
+    def load(cls, path: str | Path) -> Config:
         path = Path(path).resolve()
         with path.open("r", encoding="utf-8") as fh:
             raw: dict[str, Any] = yaml.safe_load(fh)
