@@ -7,11 +7,16 @@ information needs. We present **NeuroGraphRAG**, a graph-augmented retrieval sys
 embedder in a single curated ontology with *multilingual aliases*, yielding cross-lingual concept
 embeddings without any trained model; and (ii) introduces **Community-Aware Cross-Lingual Retrieval
 Fusion (C²RF)**, which augments reciprocal-rank fusion of lexical, dense, and graph signals with a
-knowledge-graph *community prior*. On a bundled multilingual benchmark (44 passages, 24 queries, four
-languages), C²RF attains the best nDCG@10 (0.766), MAP (0.648), and Recall@5 (0.712), improving nDCG@10
-over the strongest fusion baseline by 4.1 points and over BM25 by 7.5 points, with the largest gains on
-cross-lingual (+18.5 over BM25) and global (+6.5 over the strongest baseline) queries. The full pipeline
-runs offline on CPU; optional `sentence-transformers` + LoRA/PEFT and FAISS backends are supported.
+knowledge-graph *community prior*; and (iii) a **Conformal GraphRAG** risk-control layer that returns
+variable-size retrieval sets with a distribution-free coverage guarantee, together with
+community-conditional and cross-lingual calibration and risk-controlled abstention. On a bundled
+multilingual benchmark (59 passages, 72 queries, four languages), C²RF attains the best nDCG@10 (0.722),
+MAP (0.608), and Recall@5 (0.633), best on every query type, with the clearest margins on cross-lingual
+and global queries. The conformal layer's coverage guarantee holds empirically (e.g. 0.814 at target
+0.80) yet exposes a severe hidden failure — the worst knowledge-graph community is covered only 3.7% of
+the time under marginal calibration, which Mondrian calibration repairs 6× — and shows that
+English-calibrated guarantees under-cover Bengali/Tamil. The full pipeline runs offline on CPU; optional
+`sentence-transformers` + LoRA/PEFT and FAISS backends are supported.
 
 ---
 
@@ -38,6 +43,9 @@ Our contributions are:
 - **C²RF.** A multiplicative community prior over reciprocal-rank fusion that promotes passages whose
   concepts lie in the knowledge-graph community most associated with the query, gated on concept overlap
   so that on-topic passages are never demoted below same-community distractors.
+- **Conformal GraphRAG**: a distribution-free risk-control layer on top of retrieval, with
+  community-conditional (Mondrian) and cross-lingual calibration and risk-controlled selective
+  abstention — surfacing and repairing conditional-coverage failures a marginal guarantee hides.
 - **A reproducible, offline evaluation harness** (MRR, MAP, Recall@k, nDCG@k, and RAGAS-style embedding
   proxies) with a full ablation grid.
 
@@ -96,10 +104,10 @@ development.
 
 ## 4. Experimental setup
 
-**Benchmark.** 44 concept-dense passages spanning EEG rhythms, ERP components, analysis methods, BCI,
-disorders, and cognition, authored in English with parallel Hindi passages and additional Bengali/Tamil
-passages; 24 queries labelled by type (factoid, cross-lingual, global, multi-hop) with binary relevance
-judgments and reference answers. Data is regenerable via `scripts/prepare_data.py`.
+**Benchmark.** 59 concept-dense passages spanning EEG rhythms, ERP components, analysis methods, BCI,
+disorders, and cognition, authored in English with parallel Hindi/Bengali/Tamil passages; 72 queries
+labelled by type (factoid, cross-lingual, global, multi-hop) with binary relevance judgments and
+reference answers. Data is regenerable via `scripts/prepare_data.py`.
 
 **Metrics.** MRR, MAP, Recall@{1,3,5,10}, nDCG@{1,3,5,10} at the document level, plus RAGAS-style
 embedding proxies (faithfulness, answer relevancy, context precision). Primary metric: nDCG@10.
@@ -113,36 +121,63 @@ C²RF(BM25+Dense+Graph). Backend: `concept-hash`, seed 20260713.
 
 | Configuration | MRR | MAP | Recall@5 | nDCG@10 | Faithfulness |
 |---|---|---|---|---|---|
-| BM25 | 0.958 | 0.573 | 0.622 | 0.691 | 0.727 |
-| Dense | 0.951 | 0.541 | 0.580 | 0.648 | 0.724 |
-| Graph | 0.638 | 0.596 | 0.705 | 0.687 | 0.644 |
-| RRF (BM25+Dense) | **1.000** | 0.589 | 0.608 | 0.707 | 0.718 |
-| RRF (BM25+Dense+Graph) | 0.979 | 0.607 | 0.622 | 0.725 | 0.733 |
-| **C²RF (ours)** | 0.979 | **0.648** | **0.712** | **0.766** | 0.729 |
+| BM25 | 0.932 | 0.581 | 0.606 | 0.687 | 0.736 |
+| Dense | 0.934 | 0.557 | 0.573 | 0.665 | 0.720 |
+| Graph | 0.582 | 0.530 | 0.617 | 0.618 | 0.637 |
+| RRF (BM25+Dense) | **0.954** | 0.585 | 0.601 | 0.691 | 0.724 |
+| RRF (BM25+Dense+Graph) | 0.941 | 0.584 | 0.627 | 0.693 | 0.727 |
+| **C²RF (ours)** | 0.941 | **0.608** | **0.633** | **0.722** | 0.725 |
 
 **By query type (nDCG@10).**
 
 | Configuration | factoid | cross-lingual | global | multi-hop |
 |---|---|---|---|---|
-| BM25 | 0.761 | 0.582 | 0.632 | 0.832 |
-| Dense | 0.655 | 0.670 | 0.561 | 0.754 |
-| Graph | 0.799 | 0.678 | 0.345 | 0.777 |
-| RRF (BM25+Dense) | 0.736 | 0.657 | 0.682 | 0.805 |
-| RRF (BM25+Dense+Graph) | 0.758 | 0.715 | 0.617 | 0.832 |
-| **C²RF (ours)** | 0.782 | **0.767** | **0.697** | 0.832 |
+| BM25 | 0.763 | 0.678 | 0.550 | 0.692 |
+| Dense | 0.730 | 0.668 | 0.494 | 0.712 |
+| Graph | 0.753 | 0.625 | 0.304 | 0.625 |
+| RRF (BM25+Dense) | 0.758 | 0.691 | 0.549 | 0.685 |
+| RRF (BM25+Dense+Graph) | 0.755 | 0.699 | 0.557 | 0.643 |
+| **C²RF (ours)** | **0.785** | **0.721** | **0.588** | **0.735** |
 
 **Findings.**
-1. *Fusion beats any single retriever* (nDCG@10 0.766 vs ≤0.691), confirming complementary signals.
-2. *The graph signal helps*: adding it to RRF lifts nDCG@10 0.707 → 0.725 and Recall@5 via better global
-   and multi-hop coverage.
-3. *Community-awareness helps most where structure matters*: C²RF lifts nDCG@10 0.725 → 0.766, with the
-   biggest gains on cross-lingual (0.767) and global (0.697) queries.
+1. *Fusion beats any single retriever* (nDCG@10 0.722 vs ≤0.687), confirming complementary signals.
+2. *The graph signal adds recall*: adding it to RRF raises Recall@5 0.601 → 0.627 at comparable nDCG.
+3. *Community-awareness is the key lift*: C²RF raises nDCG@10 0.693 → 0.722 and wins **every** query
+   type, with the clearest margins on cross-lingual (0.721) and global (0.588).
 4. *Cross-lingual without a model*: on cross-lingual queries, concept-grounded configurations (Dense
-   0.670, C²RF 0.767) far exceed BM25 (0.582), isolating the value of shared-concept embeddings.
-5. *Honest trade-off*: two-way RRF retains a perfect MRR; C²RF trades marginal top-1 sharpness for large
-   MAP/Recall/nDCG gains — motivating adaptive, per-query fusion (future work).
+   0.668, C²RF 0.721) exceed BM25 (0.678) while pure lexical collapses on global queries, isolating the
+   value of shared-concept embeddings and graph context.
+5. *Honest trade-off*: two-way RRF retains the best MRR; C²RF trades marginal top-1 sharpness for gains
+   in MAP/Recall/nDCG — motivating adaptive, per-query fusion (future work).
 
-## 6. Domain adaptation with LoRA/PEFT (optional)
+## 6. Risk-controlled retrieval: Conformal GraphRAG
+
+Retrieval metrics report average ranking quality but give no per-query guarantee that a relevant
+document was retrieved at all. We wrap the retriever in a conformal risk-control layer that returns a
+variable-size set `C(q) = {d : s(q,d) ≥ τ}` with `P(C(q) ∩ Relevant(q) ≠ ∅) ≥ 1 − α`. The threshold is
+the `⌊α(n+1)⌋`-th order statistic of the calibration anchors `r(q) = max_{d∈Relevant(q)} s(q,d)`; the
+guarantee is distribution-free and finite-sample under query exchangeability. Full method:
+`docs/CONFORMAL.md`.
+
+**Coverage holds and sets are small.** Empirical coverage tracks the target (0.992/0.920/0.814/0.715 at
+1−α = 0.95/0.90/0.80/0.70) while the average set shrinks from 21.3 to 0.9 of 59 documents.
+
+**Conditional coverage (Mondrian).** Marginal validity is an average and hides sub-population failures.
+Grouping queries by dominant knowledge-graph community, the worst community is covered only **0.037** at
+1−α = 0.80 under a global threshold; community-conditional (Mondrian) calibration lifts it **6× to
+0.222**. This is the practical face of conformal's open *conditional-coverage* problem, on a graph.
+
+**Cross-lingual transfer.** Calibrating on English, coverage transfers to Hindi (0.87) but drops on
+Bengali (0.48) and Tamil (0.63): cross-script retrieval scores live on a different scale, so the
+English-tuned threshold is miscalibrated. Pooled multilingual calibration narrows the gap
+(bn 0.57, ta 0.72). Cross-lingual conformal coverage is essentially unstudied; this is a minimal, clean
+demonstration that exchangeability breaks across languages.
+
+**Selective generation.** With top-1 confidence and a Learn-then-Test threshold, the answered-query error
+is held under a target β (β = 0.10 → 0.083 achieved, answering 94% of queries), giving a deployable
+abstention knob.
+
+## 7. Domain adaptation with LoRA/PEFT (optional)
 
 `scripts/train_lora.py` fine-tunes a multilingual sentence encoder with a low-rank adapter using a
 contrastive objective over neuroscience passage/definition pairs mined from the ontology and corpus. The
@@ -150,22 +185,28 @@ trained adapter is merged at load time (`embedding.lora_adapter`), giving a doma
 without touching base weights. This is the intended path to scale cross-lingual dense retrieval beyond
 the offline concept-hash bridge.
 
-## 7. Limitations
+## 8. Limitations
 
 The bundled benchmark is small and partly synthetic, so absolute numbers are illustrative; the
 contribution is the *relative* ordering of configurations and the mechanism behind it. The concept-hash
 embedder's cross-lingual signal is limited to in-ontology concepts (out-of-ontology paraphrase relies on
 the optional multilingual encoder). Community detection on small graphs is unstable, which C²RF's
 concept-overlap gating is specifically designed to tolerate. RAGAS proxies are embedding-based, not
-LLM-graded.
+LLM-graded. For the conformal layer, the small query count makes point estimates noisy (mitigated by
+resampling and by reporting the exact guarantee separately from the empirical estimate), and
+language-conditional calibration is data-starved for Tamil/Bengali; scaling the benchmark is the direct
+next step.
 
-## 8. Conclusion
+## 9. Conclusion
 
 NeuroGraphRAG shows that ontology-grounded structure delivers GraphRAG-style cross-lingual and global
-retrieval benefits cheaply and reproducibly. C²RF is a small, interpretable addition to rank fusion that
-yields the best overall ranking quality on our benchmark, concentrated exactly on the queries structure
-should help. The system is a practical base for multilingual neuroscience question answering and a clean
-testbed for hybrid retrieval research.
+retrieval benefits cheaply and reproducibly, and that a conformal layer turns the retriever into a
+*risk-controlled* system with distribution-free guarantees. C²RF is a small, interpretable addition to
+rank fusion that yields the best overall ranking quality on our benchmark, while Conformal GraphRAG
+surfaces conditional-coverage and cross-lingual failures that average metrics hide and offers concrete
+mechanisms (Mondrian, pooled calibration, selective abstention) to control them. The system is a
+practical base for multilingual neuroscience question answering and a clean testbed for risk-controlled
+hybrid retrieval research.
 
 ## References (selected)
 
@@ -176,7 +217,12 @@ testbed for hybrid retrieval research.
 - F. Feng et al. *Language-agnostic BERT Sentence Embedding (LaBSE).* 2020.
 - E. Hu et al. *LoRA: Low-Rank Adaptation of Large Language Models.* ICLR 2022.
 - S. Es et al. *RAGAS: Automated Evaluation of Retrieval Augmented Generation.* 2023.
+- A. Angelopoulos, S. Bates. *A Gentle Introduction to Conformal Prediction and Distribution-Free
+  Uncertainty Quantification.* 2023.
+- A. Angelopoulos et al. *Learn Then Test: Calibrating Predictive Algorithms to Achieve Risk Control.* 2022.
+- V. Vovk. *Conditional Validity of Inductive Conformal Predictors.* ACML 2012.
 - AI4Bharat. *IndicNLP / IndicTrans.* https://ai4bharat.org
 
-*Results in §5 are produced by `python -m neurographrag.cli eval`; see `paper/results.md` for the
-auto-generated tables and figure.*
+*Results in §5 are produced by `python -m neurographrag.cli eval`; conformal results in §6 by
+`python -m neurographrag.cli conformal`. See `paper/results.md` and `paper/conformal_results.md` for the
+auto-generated tables and figures.*

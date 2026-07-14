@@ -95,6 +95,19 @@ class Evaluation(BaseModel):
     ragas: RagasCfg = Field(default_factory=RagasCfg)
 
 
+class Conformal(BaseModel):
+    """Risk-controlled (conformal) retrieval study settings."""
+
+    alphas: list[float] = Field(default_factory=lambda: [0.05, 0.1, 0.15, 0.2, 0.3])
+    primary_alpha: float = 0.2
+    trials: int = 500          # random calib/test resamples (small-n error bars)
+    calib_frac: float = 0.5
+    retrievers: list[str] = Field(default_factory=lambda: ["bm25", "dense", "graph"])
+    fusion: str = "c2rf"
+    min_group_calib: int = 3   # below this a Mondrian group falls back to the global threshold
+    risk_betas: list[float] = Field(default_factory=lambda: [0.1, 0.2, 0.3, 0.4])
+
+
 class Config(BaseModel):
     seed: int = 20260713
     paths: Paths
@@ -104,6 +117,7 @@ class Config(BaseModel):
     retrieval: Retrieval = Field(default_factory=Retrieval)
     generation: Generation = Field(default_factory=Generation)
     evaluation: Evaluation = Field(default_factory=Evaluation)
+    conformal: Conformal = Field(default_factory=Conformal)
 
     # Populated by load(): the repo root the relative paths resolve against.
     root: str = "."

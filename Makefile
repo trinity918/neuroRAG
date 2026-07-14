@@ -5,7 +5,7 @@
 PYTHON ?= python
 PKG    := neurographrag
 
-.PHONY: help install install-extras dev-install index eval report demo api web test lint fmt clean
+.PHONY: help install install-extras dev-install index eval conformal report demo api web test lint fmt clean
 
 help:
 	@echo "NeuroGraphRAG targets:"
@@ -14,6 +14,7 @@ help:
 	@echo "  dev-install     Editable install with dev tools"
 	@echo "  index           Build the knowledge graph + retrieval indexes"
 	@echo "  eval            Run the reproducible evaluation (ablations)"
+	@echo "  conformal       Run the risk-controlled (conformal) retrieval study"
 	@echo "  report          Regenerate results tables/figures from the last eval"
 	@echo "  demo            One-shot: index + eval + report"
 	@echo "  api             Launch the FastAPI backend (serves the static UI)"
@@ -36,6 +37,9 @@ index:
 
 eval:
 	$(PYTHON) -m $(PKG).cli eval --config configs/default.yaml
+
+conformal:
+	$(PYTHON) -m $(PKG).cli conformal --config configs/default.yaml
 
 report:
 	$(PYTHON) -m $(PKG).cli report --config configs/default.yaml

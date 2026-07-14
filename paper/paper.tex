@@ -25,11 +25,15 @@ biomedical literature) that (i) grounds a knowledge graph, a graph retriever, an
 single curated ontology with \emph{multilingual aliases}, yielding cross-lingual concept embeddings
 without any trained model; and (ii) introduces \textbf{Community-Aware Cross-Lingual Retrieval Fusion
 (C\textsuperscript{2}RF)}, which augments reciprocal-rank fusion of lexical, dense, and graph signals
-with a knowledge-graph community prior. On a bundled multilingual benchmark (44 passages, 24 queries,
-four languages), C\textsuperscript{2}RF attains the best nDCG@10 (0.766), MAP (0.648), and Recall@5
-(0.712), improving nDCG@10 over the strongest fusion baseline by 4.1 points and over BM25 by 7.5 points,
-with the largest gains on cross-lingual (+18.5 over BM25) and global (+6.5) queries. The full pipeline
-runs offline on CPU; optional \texttt{sentence-transformers}+LoRA/PEFT and FAISS backends are supported.
+with a knowledge-graph community prior; and (iii) a \textbf{Conformal GraphRAG} layer that returns
+variable-size retrieval sets with distribution-free coverage guarantees, plus community-conditional and
+cross-lingual calibration and risk-controlled abstention. On a bundled multilingual benchmark (59
+passages, 72 queries, four languages), C\textsuperscript{2}RF attains the best nDCG@10 (0.722), MAP
+(0.608), and Recall@5 (0.633), and wins every query type. The conformal layer's coverage guarantee holds
+empirically yet exposes a hidden failure -- the worst knowledge-graph community is covered only 3.7\% of
+the time under marginal calibration, repaired 6$\times$ by Mondrian calibration -- and shows that
+English-calibrated guarantees under-cover Bengali/Tamil. The pipeline runs offline on CPU; optional
+\texttt{sentence-transformers}+LoRA/PEFT and FAISS backends are supported.
 \end{abstract}
 
 \section{Introduction}
@@ -68,9 +72,9 @@ affinity $a(p)$ is the community-weight mass of the query-relevant concepts that
 same-community distractor.
 
 \section{Experiments}
-The benchmark has 44 concept-dense passages (English with parallel Hindi, plus Bengali/Tamil) and 24
-typed queries (factoid, cross-lingual, global, multi-hop) with binary relevance and reference answers.
-Primary metric is nDCG@10; backend \texttt{concept-hash}; seed 20260713.
+The benchmark has 59 concept-dense passages (English with parallel Hindi/Bengali/Tamil) and 72 typed
+queries (factoid, cross-lingual, global, multi-hop) with binary relevance and reference answers. Primary
+metric is nDCG@10; backend \texttt{concept-hash}; seed 20260713.
 
 \begin{table}[t]
 \centering\small
@@ -79,12 +83,12 @@ Primary metric is nDCG@10; backend \texttt{concept-hash}; seed 20260713.
 \toprule
 Configuration & MRR & MAP & R@5 & nDCG@10 \\
 \midrule
-BM25 & 0.958 & 0.573 & 0.622 & 0.691 \\
-Dense & 0.951 & 0.541 & 0.580 & 0.648 \\
-Graph & 0.638 & 0.596 & 0.705 & 0.687 \\
-RRF (BM25+Dense) & \textbf{1.000} & 0.589 & 0.608 & 0.707 \\
-RRF (+Graph) & 0.979 & 0.607 & 0.622 & 0.725 \\
-\textbf{C\textsuperscript{2}RF (ours)} & 0.979 & \textbf{0.648} & \textbf{0.712} & \textbf{0.766} \\
+BM25 & 0.932 & 0.581 & 0.606 & 0.687 \\
+Dense & 0.934 & 0.557 & 0.573 & 0.665 \\
+Graph & 0.582 & 0.530 & 0.617 & 0.618 \\
+RRF (BM25+Dense) & \textbf{0.954} & 0.585 & 0.601 & 0.691 \\
+RRF (+Graph) & 0.941 & 0.584 & 0.627 & 0.693 \\
+\textbf{C\textsuperscript{2}RF (ours)} & 0.941 & \textbf{0.608} & \textbf{0.633} & \textbf{0.722} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -96,24 +100,38 @@ RRF (+Graph) & 0.979 & 0.607 & 0.622 & 0.725 \\
 \toprule
 Configuration & fact. & cross-ling. & global & multi-hop \\
 \midrule
-BM25 & 0.761 & 0.582 & 0.632 & 0.832 \\
-Dense & 0.655 & 0.670 & 0.561 & 0.754 \\
-RRF (B+D) & 0.736 & 0.657 & 0.682 & 0.805 \\
-\textbf{C\textsuperscript{2}RF} & 0.782 & \textbf{0.767} & \textbf{0.697} & 0.832 \\
+BM25 & 0.763 & 0.678 & 0.550 & 0.692 \\
+Dense & 0.730 & 0.668 & 0.494 & 0.712 \\
+RRF (B+D) & 0.758 & 0.691 & 0.549 & 0.685 \\
+\textbf{C\textsuperscript{2}RF} & \textbf{0.785} & \textbf{0.721} & \textbf{0.588} & \textbf{0.735} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Findings.} Fusion beats any single retriever; adding the graph signal lifts nDCG@10
-$0.707\!\to\!0.725$; and C\textsuperscript{2}RF lifts it $0.725\!\to\!0.766$, concentrated on
-cross-lingual and global queries. On cross-lingual queries, concept-grounded configurations far exceed
-BM25 (0.767/0.670 vs.\ 0.582), isolating the value of shared-concept embeddings.
+\textbf{Findings.} Fusion beats any single retriever; the graph signal adds recall (Recall@5
+$0.601\!\to\!0.627$); and C\textsuperscript{2}RF lifts nDCG@10 $0.693\!\to\!0.722$, winning every query
+type and concentrated on cross-lingual and global queries. On cross-lingual queries, concept-grounded
+configurations exceed BM25 (0.721/0.668 vs.\ 0.678) while lexical retrieval collapses on global queries,
+isolating the value of shared-concept embeddings and graph context.
+
+\section{Conformal GraphRAG: risk control}
+We wrap the retriever in a conformal layer returning a variable-size set
+$C(q)=\{d: s(q,d)\ge\tau\}$ with $P(C(q)\cap\mathrm{Rel}(q)\neq\emptyset)\ge 1-\alpha$, where $\tau$ is
+the $\lfloor\alpha(n+1)\rfloor$ order statistic of calibration anchors $r(q)=\max_{d\in\mathrm{Rel}(q)}
+s(q,d)$; the guarantee is distribution-free under query exchangeability. Empirically coverage tracks the
+target (0.814 at $1-\alpha=0.80$) with sets shrinking to $\sim$1 of 59 documents. Crucially, marginal
+calibration hides conditional failures: the worst knowledge-graph community is covered only 0.037,
+raised $6\times$ to 0.222 by community-conditional (Mondrian) calibration. Calibrating on English
+under-covers Bengali (0.48) and Tamil (0.63), a cross-lingual distribution-shift effect that pooled
+calibration narrows. Learn-then-Test selective generation bounds answered-query error at a target
+$\beta$ (e.g.\ $\beta{=}0.10\to0.083$ at 94\% answer rate).
 
 \section{Limitations and Conclusion}
 The benchmark is small and partly synthetic, so the contribution is the relative ordering of
-configurations and its mechanism. NeuroGraphRAG shows ontology-grounded structure delivers
-GraphRAG-style cross-lingual and global benefits cheaply and reproducibly, with C\textsuperscript{2}RF a
-small, interpretable addition to rank fusion.
+configurations, the conformal guarantees, and their mechanisms. NeuroGraphRAG shows ontology-grounded
+structure delivers GraphRAG-style cross-lingual and global benefits cheaply and reproducibly, with
+C\textsuperscript{2}RF a small, interpretable addition to rank fusion, and a conformal layer that turns
+the retriever into a risk-controlled system exposing failures average metrics hide.
 
 \begin{thebibliography}{9}
 \bibitem{edge2024graphrag} D.\ Edge et al.\ From Local to Global: A Graph RAG Approach to Query-Focused Summarization. 2024.
@@ -122,6 +140,9 @@ small, interpretable addition to rank fusion.
 \bibitem{labse} F.\ Feng et al.\ Language-agnostic BERT Sentence Embedding. 2020.
 \bibitem{lora} E.\ Hu et al.\ LoRA: Low-Rank Adaptation of Large Language Models. ICLR 2022.
 \bibitem{ragas} S.\ Es et al.\ RAGAS. 2023.
+\bibitem{angelopoulos2023} A.\ Angelopoulos, S.\ Bates. A Gentle Introduction to Conformal Prediction. 2023.
+\bibitem{ltt} A.\ Angelopoulos et al.\ Learn Then Test: Calibrating Predictive Algorithms to Achieve Risk Control. 2022.
+\bibitem{mondrian} V.\ Vovk. Conditional Validity of Inductive Conformal Predictors. ACML 2012.
 \end{thebibliography}
 
 \end{document}

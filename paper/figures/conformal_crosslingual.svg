@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="520" height="360" fill="white"/>
+<text x="16" y="22" font-size="15" font-weight="700" fill="#1f2937">Cross-lingual coverage transfer</text>
+<rect x="77.9" y="176.8" width="32.2" height="113.2" rx="2" fill="#f59e0b"/>
+<text x="94.0" y="172.8" font-size="8.5" fill="#334155" text-anchor="middle">0.48</text>
+<rect x="113.8" y="156.0" width="32.2" height="134.0" rx="2" fill="#4f46e5"/>
+<text x="129.9" y="152.0" font-size="8.5" fill="#334155" text-anchor="middle">0.57</text>
+<text x="113.8" y="305" font-size="9.5" fill="#475569" text-anchor="middle">BN</text>
+<rect x="185.4" y="92.2" width="32.2" height="197.8" rx="2" fill="#f59e0b"/>
+<text x="201.5" y="88.2" font-size="8.5" fill="#334155" text-anchor="middle">0.84</text>
+<rect x="221.2" y="77.1" width="32.2" height="212.9" rx="2" fill="#4f46e5"/>
+<text x="237.4" y="73.1" font-size="8.5" fill="#334155" text-anchor="middle">0.91</text>
+<text x="221.2" y="305" font-size="9.5" fill="#475569" text-anchor="middle">EN</text>
+<rect x="292.9" y="85.5" width="32.2" height="204.5" rx="2" fill="#f59e0b"/>
+<text x="309.0" y="81.5" font-size="8.5" fill="#334155" text-anchor="middle">0.87</text>
+<rect x="328.8" y="71.2" width="32.2" height="218.8" rx="2" fill="#4f46e5"/>
+<text x="344.9" y="67.2" font-size="8.5" fill="#334155" text-anchor="middle">0.93</text>
+<text x="328.8" y="305" font-size="9.5" fill="#475569" text-anchor="middle">HI</text>
+<rect x="400.4" y="142.5" width="32.2" height="147.5" rx="2" fill="#f59e0b"/>
+<text x="416.5" y="138.5" font-size="8.5" fill="#334155" text-anchor="middle">0.63</text>
+<rect x="436.2" y="120.8" width="32.2" height="169.2" rx="2" fill="#4f46e5"/>
+<text x="452.4" y="116.8" font-size="8.5" fill="#334155" text-anchor="middle">0.72</text>
+<text x="436.2" y="305" font-size="9.5" fill="#475569" text-anchor="middle">TA</text>
+<line x1="60" y1="102.0" x2="490" y2="102.0" stroke="#ef4444" stroke-dasharray="5 4"/>
+<text x="486" y="98.0" font-size="9" fill="#ef4444" text-anchor="end">target 1-α = 0.80</text>
+<line x1="60" y1="290" x2="490" y2="290" stroke="#cbd5e1"/>
+<rect x="60" y="340" width="11" height="11" fill="#f59e0b"/>
+<text x="75" y="349" font-size="10" fill="#475569">English-calibrated</text>
+<rect x="226" y="340" width="11" height="11" fill="#4f46e5"/>
+<text x="241" y="349" font-size="10" fill="#475569">pooled-calibrated</text>
+<text x="14" y="49" font-size="10" fill="#475569">coverage</text>
+</svg>

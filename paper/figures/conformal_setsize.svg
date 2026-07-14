@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 340" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="480" height="340" fill="white"/>
+<text x="16" y="22" font-size="15" font-weight="700" fill="#1f2937">Efficiency: prediction-set size vs 1-α</text>
+<rect x="80.0" y="50.0" width="47.5" height="230.0" rx="3" fill="#4f46e5"/>
+<text x="103.8" y="44.0" font-size="10" fill="#1f2937" text-anchor="middle">21.3</text>
+<text x="103.8" y="296" font-size="10" fill="#64748b" text-anchor="middle">0.95</text>
+<rect x="156.0" y="172.2" width="47.5" height="107.8" rx="3" fill="#4f46e5"/>
+<text x="179.8" y="166.2" font-size="10" fill="#1f2937" text-anchor="middle">10.0</text>
+<text x="179.8" y="296" font-size="10" fill="#64748b" text-anchor="middle">0.90</text>
+<rect x="232.0" y="255.0" width="47.5" height="25.0" rx="3" fill="#4f46e5"/>
+<text x="255.8" y="249.0" font-size="10" fill="#1f2937" text-anchor="middle">2.3</text>
+<text x="255.8" y="296" font-size="10" fill="#64748b" text-anchor="middle">0.85</text>
+<rect x="308.0" y="265.0" width="47.5" height="15.0" rx="3" fill="#4f46e5"/>
+<text x="331.8" y="259.0" font-size="10" fill="#1f2937" text-anchor="middle">1.4</text>
+<text x="331.8" y="296" font-size="10" fill="#64748b" text-anchor="middle">0.80</text>
+<rect x="384.0" y="270.5" width="47.5" height="9.5" rx="3" fill="#4f46e5"/>
+<text x="407.8" y="264.5" font-size="10" fill="#1f2937" text-anchor="middle">0.9</text>
+<text x="407.8" y="296" font-size="10" fill="#64748b" text-anchor="middle">0.70</text>
+<line x1="60" y1="280" x2="440" y2="280" stroke="#cbd5e1"/>
+<text x="250.0" y="334" font-size="11" fill="#475569" text-anchor="middle">target coverage (1 - α) — universe = 59 docs</text>
+</svg>

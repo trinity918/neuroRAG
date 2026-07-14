@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="520" height="360" fill="white"/>
+<text x="16" y="22" font-size="15" font-weight="700" fill="#1f2937">Conditional coverage by KG community</text>
+<rect x="74.3" y="290.0" width="25.8" height="0.0" rx="2" fill="#94a3b8"/>
+<text x="87.2" y="286.0" font-size="8.5" fill="#334155" text-anchor="middle">0.00</text>
+<rect x="103.0" y="219.2" width="25.8" height="70.8" rx="2" fill="#10b981"/>
+<text x="115.9" y="215.2" font-size="8.5" fill="#334155" text-anchor="middle">0.30</text>
+<text x="103.0" y="305" font-size="9.5" fill="#475569" text-anchor="middle">c-1 (n=4)</text>
+<rect x="160.3" y="102.9" width="25.8" height="187.1" rx="2" fill="#94a3b8"/>
+<text x="173.2" y="98.9" font-size="8.5" fill="#334155" text-anchor="middle">0.80</text>
+<rect x="189.0" y="83.9" width="25.8" height="206.1" rx="2" fill="#10b981"/>
+<text x="201.9" y="79.9" font-size="8.5" fill="#334155" text-anchor="middle">0.88</text>
+<text x="189.0" y="305" font-size="9.5" fill="#475569" text-anchor="middle">c1 (n=7)</text>
+<rect x="246.3" y="100.1" width="25.8" height="189.9" rx="2" fill="#94a3b8"/>
+<text x="259.2" y="96.1" font-size="8.5" fill="#334155" text-anchor="middle">0.81</text>
+<rect x="275.0" y="95.9" width="25.8" height="194.1" rx="2" fill="#10b981"/>
+<text x="287.9" y="91.9" font-size="8.5" fill="#334155" text-anchor="middle">0.83</text>
+<text x="275.0" y="305" font-size="9.5" fill="#475569" text-anchor="middle">c0 (n=34)</text>
+<rect x="332.3" y="77.7" width="25.8" height="212.3" rx="2" fill="#94a3b8"/>
+<text x="345.2" y="73.7" font-size="8.5" fill="#334155" text-anchor="middle">0.90</text>
+<rect x="361.0" y="88.9" width="25.8" height="201.1" rx="2" fill="#10b981"/>
+<text x="373.9" y="84.9" font-size="8.5" fill="#334155" text-anchor="middle">0.86</text>
+<text x="361.0" y="305" font-size="9.5" fill="#475569" text-anchor="middle">c2 (n=14)</text>
+<rect x="418.3" y="61.7" width="25.8" height="228.3" rx="2" fill="#94a3b8"/>
+<text x="431.2" y="57.7" font-size="8.5" fill="#334155" text-anchor="middle">0.97</text>
+<rect x="447.0" y="88.2" width="25.8" height="201.8" rx="2" fill="#10b981"/>
+<text x="459.9" y="84.2" font-size="8.5" fill="#334155" text-anchor="middle">0.86</text>
+<text x="447.0" y="305" font-size="9.5" fill="#475569" text-anchor="middle">c3 (n=13)</text>
+<line x1="60" y1="102.0" x2="490" y2="102.0" stroke="#ef4444" stroke-dasharray="5 4"/>
+<text x="486" y="98.0" font-size="9" fill="#ef4444" text-anchor="end">target 1-α = 0.80</text>
+<line x1="60" y1="290" x2="490" y2="290" stroke="#cbd5e1"/>
+<rect x="60" y="340" width="11" height="11" fill="#94a3b8"/>
+<text x="75" y="349" font-size="10" fill="#475569">marginal</text>
+<rect x="156" y="340" width="11" height="11" fill="#10b981"/>
+<text x="171" y="349" font-size="10" fill="#475569">Mondrian (ours)</text>
+<text x="14" y="49" font-size="10" fill="#475569">coverage</text>
+</svg>

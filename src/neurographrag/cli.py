@@ -95,6 +95,31 @@ def cmd_demo(args) -> None:
     print(f"[demo] results -> {paths['results_md']} · figure -> {paths['figure']}")
 
 
+def cmd_conformal(args) -> None:
+    from .conformal import run_conformal
+    from .conformal_report import write_conformal_reports
+
+    ngr = _build(args.config)
+    run = run_conformal(ngr, ngr.cfg)
+    runs_dir = Path(ngr.cfg.root) / ngr.cfg.paths.runs
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    write_json(runs_dir / "conformal_latest.json", run)
+    paths = write_conformal_reports(ngr.cfg, run)
+
+    mc = run["mondrian_community"]
+    cl = run["cross_lingual"]
+    print("\n[conformal] marginal coverage vs target:")
+    for r in run["marginal"]:
+        print(f"    1-alpha={r['target']:.2f}  empirical={r['coverage']:.3f}  |set|={r['avg_set_size']:.1f}")
+    print(f"[conformal] worst-community coverage: marginal={mc['worst_group_coverage_marginal']:.3f} "
+          f"-> Mondrian={mc['worst_group_coverage_mondrian']:.3f} (target {mc['target']:.2f})")
+    print("[conformal] cross-lingual coverage (English-calibrated):")
+    for lg in cl["languages"]:
+        if lg in cl["english_calibrated"]:
+            print(f"    {lg}: {cl['english_calibrated'][lg]:.3f}  (pooled {cl['pooled_calibrated'][lg]:.3f})")
+    print(f"[conformal] report -> {paths['report']}")
+
+
 def cmd_serve(args) -> None:
     # config path is passed to the app via env so the factory can load it
     import os
@@ -135,6 +160,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("demo", help="index + eval + report in one shot")
     add_config(sp)
     sp.set_defaults(func=cmd_demo)
+
+    sp = sub.add_parser("conformal", help="run the risk-controlled (conformal) retrieval study")
+    add_config(sp)
+    sp.set_defaults(func=cmd_conformal)
 
     sp = sub.add_parser("serve", help="launch the FastAPI backend + static UI")
     add_config(sp)

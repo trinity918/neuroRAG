@@ -19,9 +19,15 @@ artifacts/
 *.faiss
 *.index
 runs/
+runs.json
+issues.json
 outputs/
 .cache/
 models/adapters/*/checkpoint-*/
+
+# Local scratch / envs (not part of the project)
+test_venv/
+my_packages/
 
 # Environment
 .env

@@ -96,6 +96,14 @@ def eval_results() -> dict:
     return {"error": "no evaluation run found; run `neurographrag eval` first."}
 
 
+@app.get("/api/conformal")
+def conformal_results() -> dict:
+    latest = Path(_cfg.root) / _cfg.paths.runs / "conformal_latest.json"
+    if latest.exists():
+        return read_json(latest)
+    return {"error": "no conformal run found; run `neurographrag conformal` first."}
+
+
 # --- static single-file UI (works with zero front-end build) ---
 _WEB_DIR = Path(_cfg.root) / "web"
 if _WEB_DIR.exists():

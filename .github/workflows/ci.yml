@@ -33,3 +33,7 @@ jobs:
         env:
           PYTHONPATH: src
         run: python -m neurographrag.cli eval --config configs/default.yaml
+      - name: Smoke-test conformal risk control
+        env:
+          PYTHONPATH: src
+        run: python -m neurographrag.cli conformal --config configs/default.yaml
